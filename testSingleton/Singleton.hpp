@@ -1,5 +1,6 @@
-#ifndef SINGLETON_LOG_HPP
-#define SINGLETON_LOG_HPP
+#ifndef SINGLETON_HPP
+#define SINGLETON_HPP
+
 
 #include <string>
 #include <iostream>
@@ -21,30 +22,31 @@ namespace singleton {
 
   class SingletonBaseCxx : public SingletonBase {
   public:
-    SingletonBaseCxx() = delete;
+    SingletonBaseCxx() = default;
     SingletonBaseCxx& operator=(const SingletonBaseCxx&) = delete;//赋值
     SingletonBaseCxx(const SingletonBaseCxx& ) = delete;//拷贝
+    SingletonBaseCxx(const SingletonBaseCxx&&) = delete;//移动构造
     virtual ~SingletonBaseCxx() {}
   };
 
   /*
   * 饿汉模式  多线程安全
   */
-  template <class T>
+  /*template <class T>
   class HungerCxx : public SingletonBaseCxx {
   private:
-    static std::shared_ptr<T> sh_ptr_;
+    static std::unique_ptr<T> ptr_;
 
   public:
     virtual ~HungerCxx() {
       std::cout << "delete" << std::endl;
     }
 
-    static std::shared_ptr<T> getInstance() {
-      return sh_ptr_;
+    static std::unique_ptr<T>& getInstance() {
+      return ptr_;
     }
   };
-  template <class T> std::shared_ptr<T> HungerCxx<T>::sh_ptr_ = std::shared_ptr<T>(new T());
+  template <class T> std::unique_ptr<T> HungerCxx<T>::ptr_ = std::unique_ptr<T>(new T());*/
   
 
 
@@ -59,11 +61,17 @@ namespace singleton {
     static T *ptr_;
 
   public:
-    static void destroy() {
+    ~Hunger() {
+      if (Hunger::ptr_) {
+        delete Hunger::ptr_;
+        Hunger::ptr_ = nullptr;
+      }
+    }
+    /*static void destroy() {
       if (ptr_) delete ptr_;
       ptr_ = nullptr;
       std::cout << "delete" << std::endl;
-    }
+    }*/
 
     static T * getInstance() {
       return ptr_;
